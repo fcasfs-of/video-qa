@@ -5,7 +5,7 @@
     let savedVideoUrl = ""; 
     let savedFileName = ""; 
     let savedTimeBeforeClose = 0; 
-    let showRemainingTime = false; // Estado lógico para o cálculo do tempo reverso
+    let showRemainingTime = false; 
 
     window.VideoPlayerManager = {
         /**
@@ -34,7 +34,7 @@
             playerContainer.style.setProperty('visibility', 'visible', 'important');
             playerContainer.style.setProperty('opacity', '1', 'important');
 
-            // Mapeamento semântico incluindo as classes de tooltip flutuante nos controles estruturais
+            // Mantém a classe 'has-player-tooltip' APENAS no progress-bar-root e no volume-slider
             playerContainer.innerHTML = [
                 '<div class="player-wrapper">',
                     '<!-- Viewport Visual de Renderização -->',
@@ -42,7 +42,7 @@
                         '<video id="custom-video-element" playsinline autoplay muted preload="auto" src="', sourceUrl, '"></video>',
                     '</div>',
                     '<div class="player-controls" id="player-custom-controls-ui">',
-                        '<!-- Barra de Progresso Customizada Original com Tooltip -->',
+                        '<!-- MANTIDO: Barra de Progresso Customizada Original com Tooltip -->',
                         '<div class="custom-progress-bar-container has-player-tooltip" id="progress-bar-root" data-tooltip="Linha do Tempo / Timeline">',
                             '<div class="progress-bar-buffered" id="progress-buffered"></div>',
                             '<div class="progress-bar-fill" id="progress-fill"></div>',
@@ -50,36 +50,36 @@
                         '</div>',
                         '<div class="controls-row">',
                             '<div class="controls-left">',
-                                '<button id="btn-player-play" aria-label="Play/Pause" class="player-btn has-player-tooltip" data-tooltip="Reproduzir / Pausar">',
+                                '<button id="btn-player-play" aria-label="Play/Pause" class="player-btn">',
                                     '<svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>',
                                 '</button>',
-                                '<button id="btn-player-stop" aria-label="Parar" class="player-btn has-player-tooltip" data-tooltip="Parar (Stop)">',
+                                '<button id="btn-player-stop" aria-label="Parar" class="player-btn" title="Parar">',
                                     '<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M6 6h12v12H6z"/></svg>',
                                 '</button>',
-                                '<button id="btn-player-rewind" aria-label="Retroceder 10s" class="player-btn has-player-tooltip" data-tooltip="Voltar 10s">',
+                                '<button id="btn-player-rewind" aria-label="Retroceder 10s" class="player-btn" title="Voltar 10s">',
                                     '<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>',
                                 '</button>',
-                                '<button id="btn-player-forward" aria-label="Avançar 10s" class="player-btn has-player-tooltip" data-tooltip="Avançar 10s">',
+                                '<button id="btn-player-forward" aria-label="Avançar 10s" class="player-btn" title="Avançar 10s">',
                                     '<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>',
-                                '</button>',
-                                '<button id="btn-player-loop" aria-label="Loop" class="player-btn has-player-tooltip" data-tooltip="Alternar Repetição">',
+                                </button>',
+                                '<button id="btn-player-loop" aria-label="Loop" class="player-btn">',
                                     '<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>',
                                 '</button>',
-                                '<!-- Controle de Volume com Tooltip integrado no slider -->',
+                                '<!-- Controle de Volume -->',
                                 '<div class="volume-control-wrapper">',
-                                    '<button id="btn-player-mute" class="player-btn has-player-tooltip" data-tooltip="Mudo / Som">',
+                                    '<button id="btn-player-mute" class="player-btn" aria-label="Mute Toggle">',
                                         '<svg id="icon-volume" viewBox="0 0 24 24" width="18" height="18"></svg>',
                                     '</button>',
-                                    '<input type="range" id="volume-slider" min="0" max="1" step="0.05" value="1" class="volume-slider-bar has-player-tooltip" data-tooltip="Ajustar Volume">',
+                                    '<!-- MANTIDO: Controle Deslizante com Tooltip -->',
+                                    '<input type="range" id="volume-slider" min="0" max="1" step="0.05" value="1" class="volume-slider-bar has-player-tooltip" data-tooltip="Ajustar Volume / Adjust Volume">',
                                 '</div>',
-                                '<!-- MOSTRADOR DE TEMPO INTERATIVO COM TOOLTIP -->',
-                                '<div class="time-display-container has-player-tooltip" id="time-display-click-root" data-tooltip="Alternar Tempo Restante / Total" style="cursor:pointer; user-select:none;">',
+                                '<div class="time-display-container" id="time-display-click-root" style="cursor:pointer; user-select:none;">',
                                     '<span id="player-time-display">00:00:00 / 00:00:00</span>',
                                 '</div>',
                             '</div>',
                             '<div class="controls-right">',
                                 '<div class="select-speed-wrapper">',
-                                    '<select id="player-speed-select" aria-label="Velocidade" class="has-player-tooltip" data-tooltip="Velocidade de Reprodução">',
+                                    '<select id="player-speed-select" aria-label="Velocidade">',
                                         '<option value="0.5">0.50x</option>',
                                         '<option value="0.75">0.75x</option>',
                                         '<option value="1" selected>1.00x</option>',
@@ -93,13 +93,13 @@
                                         '<option value="3">3.00x</option>',
                                     '</select>',
                                 '</div>',
-                                '<button id="btn-player-lightbox-expand" aria-label="Ampliar no Lightbox" class="player-btn has-player-tooltip" data-tooltip="Capturar Frame no Lightbox">',
+                                '<button id="btn-player-lightbox-expand" aria-label="Ampliar no Lightbox" class="player-btn" title="Capturar Frame no Lightbox">',
                                     '<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83l1.41 1.41L19 6.41V10h2V3h-7z"/></svg>',
                                 '</button>',
-                                '<button id="btn-player-fullscreen" aria-label="Tela Cheia" class="player-btn has-player-tooltip" data-tooltip="Tela Cheia (Fullscreen)">',
+                                '<button id="btn-player-fullscreen" aria-label="Tela Cheia" class="player-btn" title="Tela Cheia (Fullscreen)">',
                                     '<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>',
                                 '</button>',
-                                '<button id="btn-player-close" aria-label="Fechar" class="player-btn close-btn has-player-tooltip" data-tooltip="Fechar Player">',
+                                '<button id="btn-player-close" aria-label="Fechar" class="player-btn close-btn">',
                                     '<svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>',
                                 '</button>',
                             '</div>',
@@ -145,7 +145,6 @@
             const btnClose = playerContainer.querySelector('#btn-player-close');
             const volumeSlider = playerContainer.querySelector('#volume-slider');
             const speedSelect = playerContainer.querySelector('#player-speed-select');
-            const timeDisplay = playerContainer.querySelector('#player-time-display');
             const timeDisplayClickRoot = playerContainer.querySelector('#time-display-click-root');
             
             const progressRoot = playerContainer.querySelector('#progress-bar-root');
@@ -202,7 +201,6 @@
                 localStorage.setItem('player-setting-loop', isLooping ? 'true' : 'false');
             });
 
-            // REQUISITO ADICIONADO: Alterna o estado do cálculo de tempo entre normal e regressivo ao clicar
             timeDisplayClickRoot.addEventListener('click', function() {
                 showRemainingTime = !showRemainingTime;
                 window.VideoPlayerManager.updateTimeDisplay();
@@ -254,8 +252,6 @@
                 const pct = (videoElement.currentTime / videoElement.duration) * 100;
                 progressFill.style.width = pct + '%';
                 progressHandle.style.left = pct + '%';
-                
-                // Dispara o atualizador modular de renderização temporal
                 window.VideoPlayerManager.updateTimeDisplay();
             });
 
@@ -301,9 +297,6 @@
             });
         },
 
-        /**
-         * REQUISITO ADICIONADO: Renderiza o tempo linear corrido comum ou calcula a contagem regressiva restante
-         */
         updateTimeDisplay: function() {
             if (!videoElement || !playerContainer) return;
             const displaySpan = playerContainer.querySelector('#player-time-display');
@@ -313,11 +306,9 @@
             const total = videoElement.duration;
 
             if (showRemainingTime) {
-                // Formato Reverso: calcula os segundos que restam com prefixo negativo
                 const remaining = total - current;
                 displaySpan.textContent = "-" + this.formatTime(remaining) + " / " + this.formatTime(total);
             } else {
-                // Formato Padrão: tempo corrido incremental comum
                 displaySpan.textContent = this.formatTime(current) + " / " + this.formatTime(total);
             }
         },
