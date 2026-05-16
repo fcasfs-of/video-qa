@@ -829,6 +829,78 @@ img, video {
 
 
 
+/* ==========================================================================
+   12. ESTILIZAÇÃO DO PREVIEW GRÁFICO DE CENA E TOOLTIP DE VOLUME ISOLADO
+   ========================================================================== */
+
+/* CONTAINER DO MINI BALÃO DE PREVIEW DE CENA DA TIMELINE */
+.custom-progress-bar-container .timeline-preview-box {
+    position: absolute;
+    bottom: calc(100% + 14px); /* Eleva a caixa acima da barra mestre */
+    left: var(--preview-x, 0px);
+    transform: translateX(-50%);
+    background-color: #0f172a;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 0.5rem;
+    padding: 3px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+    display: none; /* Controlado de forma dinâmica via mousemove/mouseleave no JS */
+    pointer-events: none;
+    z-index: 2147483647 !important;
+}
+
+#timeline-preview-canvas {
+    display: block;
+    border-radius: 0.35rem;
+    background-color: #000000;
+}
+
+#timeline-preview-time {
+    display: block;
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* TOOLTIP ISOLADO EXCLUSIVAMENTE PARA O CURSOR DO SLIDER DE VOLUME */
+.slider-tooltip-container.dynamic-volume-tooltip {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.slider-tooltip-container.dynamic-volume-tooltip::after {
+    content: attr(data-player-tooltip-content);
+    position: absolute;
+    bottom: calc(100% + 12px);
+    left: var(--tooltip-x, 50%);
+    transform: translateX(-50%) translateY(4px);
+    background-color: #0f172a;
+    color: #f8fafc;
+    padding: 0.3rem 0.55rem;
+    border-radius: 0.25rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: opacity 0.1s ease-out, transform 0.1s ease-out;
+    z-index: 2147483647 !important;
+}
+
+.slider-tooltip-container.dynamic-volume-tooltip:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+
+
 /* FULLSCREEN TOTAL DO CONTAINER */
 #custom-player-container.fullscreen-mode-active {
     width: 100vw !important; height: 100vh !important; max-width: 100vw !important; max-height: 100vh !important;
