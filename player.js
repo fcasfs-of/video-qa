@@ -84,20 +84,22 @@
                                 '</div>',
                             '</div>',
                             '<div class="controls-right">',
-                                '<div class="select-speed-wrapper">',
-                                    '<select id="player-speed-select" aria-label="Velocidade">',
-                                        '<option value="0.5">0.50x</option>',
-                                        '<option value="0.75">0.75x</option>',
-                                        '<option value="1" selected>1.00x</option>',
-                                        '<option value="1.25">1.25x</option>',
-                                        '<option value="1.5">1.50x</option>',
-                                        '<option value="1.75">1.75x</option>',
-                                        '<option value="2">2.00x</option>',
-                                        '<option value="2.25">2.25x</option>',
-                                        '<option value="2.5">2.50x</option>',
-                                        '<option value="2.75">2.75x</option>',
-                                        '<option value="3">3.00x</option>',
-                                    '</select>',
+                                '<!-- NOVO: Menu Dinâmico Customizado de Velocidades -->',
+                                '<div class="player-speed-menu-wrapper" id="speed-menu-container">',
+                                    '<button id="btn-player-speed-menu" class="player-btn speed-display-btn" title="Velocidade de Reprodução">',
+                                        '1.00x',
+                                    '</button>',
+                                    '<div class="player-speed-dropdown-list" id="speed-dropdown-list">',
+                                        '<div class="speed-menu-item" data-speed="0.5">0.50x</div>',
+                                        '<div class="speed-menu-item" data-speed="0.75">0.75x</div>',
+                                        '<div class="speed-menu-item active-speed" data-speed="1">1.00x</div>',
+                                        '<div class="speed-menu-item" data-speed="1.25">1.25x</div>',
+                                        '<div class="speed-menu-item" data-speed="1.5">1.50x</div>',
+                                        '<div class="speed-menu-item" data-speed="1.75">1.75x</div>',
+                                        '<div class="speed-menu-item" data-speed="2">2.00x</div>',
+                                        '<div class="speed-menu-item" data-speed="2.5">2.50x</div>',
+                                        '<div class="speed-menu-item" data-speed="3">3.00x</div>',
+                                    '</div>',
                                 '</div>',
                                 '<!-- Botão de Captura de Tela (Snapshot) -->',
                                 '<button id="btn-player-snapshot" aria-label="Capturar Cena" class="player-btn" title="Capturar Frame Atual">',
@@ -118,12 +120,11 @@
             document.body.appendChild(playerContainer);
             videoElement = document.getElementById('custom-video-element');
 
-            // CORREÇÃO MESTRE: Cria o player fantasma e força o hardware a carregar o buffer na memória
             previewVideoElement = document.createElement('video');
             previewVideoElement.src = sourceUrl;
             previewVideoElement.muted = true;
             previewVideoElement.preload = 'auto';
-            previewVideoElement.load(); // Força o ignitor de carregamento do contêiner de mídia
+            previewVideoElement.load(); 
 
             window.VideoPlayerManager.bindEvents();
             
@@ -153,9 +154,13 @@
             const btnFullscreen = playerContainer.querySelector('#btn-player-fullscreen');
             const btnClose = playerContainer.querySelector('#btn-player-close');
             const volumeSlider = playerContainer.querySelector('#volume-slider');
-            const speedSelect = playerContainer.querySelector('#player-speed-select');
             const timeDisplayClickRoot = playerContainer.querySelector('#time-display-click-root');
             
+            const speedMenuContainer = playerContainer.querySelector('#speed-menu-container');
+            const btnSpeedMenu = playerContainer.querySelector('#btn-player-speed-menu');
+            const speedDropdownList = playerContainer.querySelector('#speed-dropdown-list');
+            const speedItems = playerContainer.querySelectorAll('.speed-menu-item');
+
             const volumeSliderWrapper = playerContainer.querySelector('#volume-slider-wrapper');
             const progressRoot = playerContainer.querySelector('#progress-bar-root');
             const previewWindow = playerContainer.querySelector('#timeline-preview-window');
@@ -173,17 +178,34 @@
                 event.preventDefault();
             });
 
-            const handleFullscreenChange = function() {
-                const fsEl = (document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
-                if (fsEl === playerContainer) {
-                    playerContainer.classList.add('fullscreen-mode-active');
-                } else {
-                    playerContainer.classList.remove('fullscreen-mode-active');
-                }
-            };
+            // LOGICA DO NOVO MENU DE VELOCIDADE CUSTOMIZADO
+            btnSpeedMenu.addEventListener('click', function(e) {
+                e.stopPropagation();
+                speedMenuContainer.classList.toggle('menu-open');
+            });
 
-            document.addEventListener('fullscreenchange', handleFullscreenChange);
-            document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+            // Fecha o menu automaticamente se o usuário tirar o mouse de cima do contêiner
+            speedMenuContainer.addEventListener('mouseleave', function() {
+                speedMenuContainer.classList.remove('menu-open');
+            });
+
+            // Mapeia e escuta o clique nas opções do menu de velocidade
+            speedItems.forEach(function(item) {
+                item.addEventListener('click', function() {
+                    const speed = parseFloat(item.getAttribute('data-speed'));
+                    videoElement.playbackRate = speed;
+                    localStorage.setItem('player-setting-speed', speed);
+                    
+                    // Atualiza o texto do botão mestre
+                    btnSpeedMenu.textContent = speed.toFixed(2) + 'x';
+                    
+                    // Atualiza a classe ativa do item do menu
+                    speedItems.forEach(el => el.classList.remove('active-speed'));
+                    item.classList.add('active-speed');
+                    
+                    speedMenuContainer.classList.remove('menu-open');
+                });
+            });
 
             btnPlay.addEventListener('click', function() {
                 if (videoElement.paused || videoElement.ended) {
@@ -235,19 +257,17 @@
                 }
             });
 
-            // CORREÇÃO: ESCUTA ASSÍNCRONA REATIVA COM RENDERIZAÇÃO VIA EVENTO 'SEEKED'
+            // PREVIEW GRÁFICO DE CENA DA TIMELINE
             let isRenderingPreview = false;
-            
             const renderCanvasPreview = function() {
                 if (!previewVideoElement || !previewCanvas) return;
                 const ctx = previewCanvas.getContext('2d');
                 ctx.fillStyle = '#000000';
-                ctx.fillRect(0, 0, previewCanvas.width, previewCanvas.height); // Desenha fundo preto preventivo anti-gargalo
+                ctx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
                 ctx.drawImage(previewVideoElement, 0, 0, previewCanvas.width, previewCanvas.height);
                 isRenderingPreview = false;
             };
 
-            // Vincula o callback de sucesso de busca do quadro ao player fantasma
             previewVideoElement.addEventListener('seeked', renderCanvasPreview);
 
             progressRoot.addEventListener('mousemove', function(e) {
@@ -258,8 +278,6 @@
                 pct = Math.min(Math.max(pct, 0), 1);
                 
                 const timeAtCursor = pct * videoElement.duration;
-                
-                // Executa a busca de frames de forma protegida para não engasgar o pipeline
                 if (!isRenderingPreview) {
                     isRenderingPreview = true;
                     previewVideoElement.currentTime = timeAtCursor;
@@ -276,7 +294,7 @@
                 previewWindow.style.display = 'none'; 
             });
 
-            // RASTREAMENTO DO TOOLTIP DE VOLUME REATIVO NO PAI DO SLIDER
+            // TOOLTIP DE VOLUME REATIVO NO PAI DO SLIDER
             volumeSlider.addEventListener('mousemove', function(e) {
                 const rect = volumeSlider.getBoundingClientRect();
                 let pct = (e.clientX - rect.left) / rect.width;
@@ -293,16 +311,11 @@
                 volumeSliderWrapper.removeAttribute('data-player-tooltip-content');
             });
 
-            btnFullscreen.addEventListener('click', function() {
-                if (!playerContainer) return;
-                const isCurrentlyFS = (document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
-                if (!isCurrentlyFS) {
-                    if (playerContainer.requestFullscreen) { playerContainer.requestFullscreen(); }
-                    else if (playerContainer.webkitRequestFullscreen) { playerContainer.webkitRequestFullscreen(); }
-                } else {
-                    if (document.exitFullscreen) { document.exitFullscreen(); }
-                }
-            });
+            const handleFullscreenChangeToggle = function() {
+                const fsEl = (document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+                if (!fsEl) speedMenuContainer.classList.remove('menu-open');
+            };
+            document.addEventListener('fullscreenchange', handleFullscreenChangeToggle);
 
             volumeSlider.addEventListener('input', function(e) {
                 const vol = parseFloat(e.target.value);
@@ -359,20 +372,12 @@
                 isDraggingProgress = false;
             });
 
-            speedSelect.addEventListener('change', function(e) {
-                const speed = parseFloat(e.target.value);
-                videoElement.playbackRate = speed;
-                localStorage.setItem('player-setting-speed', speed);
-            });
-
             btnClose.addEventListener('click', function() {
                 if (videoElement) { savedTimeBeforeClose = videoElement.currentTime; }
-                
-                // Limpa a escuta assíncrona ao fechar para evitar vazamentos na pilha do DOM
                 if (previewVideoElement) {
                     previewVideoElement.removeEventListener('seeked', renderCanvasPreview);
                 }
-                
+                document.removeEventListener('fullscreenchange', handleFullscreenChangeToggle);
                 window.VideoPlayerManager.destroy();
                 window.VideoPlayerManager.createRecoveryButton();
             });
@@ -419,8 +424,18 @@
             const savedMuted = localStorage.getItem('player-setting-muted');
 
             if (savedSpeed) {
-                playerContainer.querySelector('#player-speed-select').value = savedSpeed;
-                videoElement.playbackRate = parseFloat(savedSpeed);
+                const speedNum = parseFloat(savedSpeed);
+                videoElement.playbackRate = speedNum;
+                playerContainer.querySelector('#btn-player-speed-menu').textContent = speedNum.toFixed(2) + 'x';
+                
+                const speedItems = playerContainer.querySelectorAll('.speed-menu-item');
+                speedItems.forEach(function(item) {
+                    if (parseFloat(item.getAttribute('data-speed')) === speedNum) {
+                        item.classList.add('active-speed');
+                    } else {
+                        item.classList.remove('active-speed');
+                    }
+                });
             }
             if (savedLoop === 'true') {
                 isLooping = true;
