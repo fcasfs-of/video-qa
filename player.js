@@ -38,6 +38,7 @@
                 '<div class="player-wrapper">',
                     '<!-- Viewport Visual de Renderização -->',
                     '<div id="player-viewport" class="player-video-viewport">',
+                        '<!-- Muted nativo inicial garante o bypass de segurança do autoplay do navegador -->',
                         '<video id="custom-video-element" playsinline autoplay muted preload="auto" src="', sourceUrl, '"></video>',
                     '</div>',
                     '<div class="player-controls" id="player-custom-controls-ui">',
@@ -57,14 +58,13 @@
                                 '</button>',
                                 '<button id="btn-player-rewind" aria-label="Retroceder 10s" class="player-btn" title="Voltar 10s">',
                                     '<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>',
-                                </button>',
+                                '</button>',
                                 '<button id="btn-player-forward" aria-label="Avançar 10s" class="player-btn" title="Avançar 10s">',
                                     '<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>',
                                 '</button>',
                                 '<button id="btn-player-loop" aria-label="Loop" class="player-btn">',
                                     '<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>',
                                 '</button>',
-                                '<!-- Controle de Volume com Tooltip Dinâmico -->',
                                 '<div class="volume-control-wrapper dynamic-player-tooltip" id="volume-tooltip-root">',
                                     '<button id="btn-player-mute" class="player-btn" aria-label="Mute Toggle">',
                                         '<svg id="icon-volume" viewBox="0 0 24 24" width="18" height="18"></svg>',
@@ -109,7 +109,8 @@
             document.body.appendChild(playerContainer);
             videoElement = document.getElementById('custom-video-element');
 
-            videoElement.addEventListener('loadeddata', function onLoadedDataForce() {
+            // FUNÇÃO FORÇADA DE IGNIÇÃO COM RESGATE DE HISTÓRICO
+            const forceStartPlayerPipeline = function() {
                 window.VideoPlayerManager.bindEvents();
                 
                 if (savedTimeBeforeClose > 0) {
@@ -123,10 +124,15 @@
                     const btnPlay = playerContainer.querySelector('#btn-player-play');
                     if (btnPlay) btnPlay.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>';
                 });
-                videoElement.removeEventListener('loadeddata', onLoadedDataForce);
-            });
+            };
 
-            videoElement.load();
+            // BLINDAGEM COMPLETA ANTI-ATRAZO: Se a memória do navegador já carregou o vídeo, inicia na hora
+            if (videoElement.readyState >= 1) {
+                forceStartPlayerPipeline();
+            } else {
+                // Caso contrário, aguarda o primeiro sinal de carregamento disponível
+                videoElement.addEventListener('loadedmetadata', forceStartPlayerPipeline, { once: true });
+            }
         },
 
         bindEvents: function() {
@@ -170,7 +176,6 @@
             document.addEventListener('fullscreenchange', handleFullscreenChange);
             document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
 
-            // Play / Pause
             btnPlay.addEventListener('click', function() {
                 if (videoElement.paused || videoElement.ended) {
                     videoElement.play().then(function() { btnPlay.innerHTML = svgPause; });
@@ -206,7 +211,6 @@
                 window.VideoPlayerManager.updateTimeDisplay();
             });
 
-            // INTERAÇÃO DO TOOLTIP DA BARRA DE PROGRESSO (CALCULA TEMPO REAL FORMATADO AO PASSAR O MOUSE)
             progressRoot.addEventListener('mousemove', function(e) {
                 if (!videoElement.duration) return;
                 const rect = progressRoot.getBoundingClientRect();
@@ -217,13 +221,10 @@
                 const formattedTime = window.VideoPlayerManager.formatTime(timeAtCursor);
                 
                 progressRoot.setAttribute('data-player-tooltip-content', formattedTime);
-                
-                // Centraliza a caixinha horizontalmente em cima do cursor do mouse
                 const relativeX = e.clientX - rect.left;
                 progressRoot.style.setProperty('--tooltip-x', relativeX + 'px');
             });
 
-            // INTERAÇÃO DO TOOLTIP DE VOLUME (CALCULA PORCENTAGEM DINÂMICA AO PASSAR O MOUSE)
             volumeSlider.addEventListener('mousemove', function(e) {
                 const rect = volumeSlider.getBoundingClientRect();
                 let pct = (e.clientX - rect.left) / rect.width;
@@ -231,9 +232,7 @@
                 
                 const percentage = Math.round(pct * 100) + "%";
                 volumeTooltipRoot.setAttribute('data-player-tooltip-content', percentage);
-                
-                // Posiciona alinhado ao cursor dentro do container de volume
-                const relativeX = e.clientX - rect.left + 36; // 36px compensa o espaço do botão Mute à esquerda
+                const relativeX = e.clientX - rect.left + 36; 
                 volumeTooltipRoot.style.setProperty('--tooltip-x', relativeX + 'px');
             });
 
@@ -271,7 +270,6 @@
                 localStorage.setItem('player-setting-volume', vol);
                 localStorage.setItem('player-setting-muted', vol === 0 ? 'true' : 'false');
                 
-                // Atualiza o valor numérico do tooltip imediatamente durante o arraste físico
                 const percentage = Math.round(vol * 100) + "%";
                 volumeTooltipRoot.setAttribute('data-player-tooltip-content', percentage);
             });
