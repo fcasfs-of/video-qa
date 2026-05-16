@@ -42,7 +42,7 @@
 }
 
 /* ==========================================================================
-   2. VIEWPORT VISUAL E BOTÕES FLUTUANTES NO CANTO INFERIOR ESQUERDO
+   2. VIEWPORT VISUAL E BOTÕES FLUTUANTES NO CANTO INFERIOR ESQUERDO (MOBILE SAFE)
    ========================================================================== */
 .player-video-viewport {
     position: relative; /* Base de ancoragem fixa para os botões flutuantes */
@@ -54,16 +54,18 @@
     border: 1px solid #334155;
     flex-shrink: 0;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), height 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+                height 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+                transform 0.2s ease;
 }
 
 .player-video-viewport video {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: contain; /* Garante que a proporção original do filme nunca mude */
 }
 
-/* Fixado estritamente no canto inferior esquerdo com visibilidade garantida */
+/* BOTÕES FLUTUANTES INTEGRADOS À TELA */
 .viewport-floating-action-btn {
     position: absolute;
     bottom: 8px;
@@ -71,18 +73,20 @@
     background-color: rgba(15, 23, 42, 0.85);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: #f8fafc !important;
-    padding: 6px;
-    border-radius: 0.375rem;
+    padding: 8px; 
+    min-width: 36px;
+    min-height: 36px;
+    border-radius: 0.5rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 100;
-    opacity: 0; /* Oculto por padrão, surge no hover */
-    transition: opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+    opacity: 0; /* Fica invisível no PC até o hover */
+    transition: opacity 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
 }
 
-/* Força a exibição imediata do botão ao passar o mouse sobre a tela */
+/* Exibe o botão imediatamente ao passar o mouse (PC) */
 .player-video-viewport:hover .viewport-floating-action-btn {
     opacity: 1 !important;
 }
@@ -91,19 +95,40 @@
     background-color: #06b6d4;
     color: #ffffff !important;
     border-color: #06b6d4;
+    transform: scale(1.05);
 }
 
-/* ESTADO REATIVO EXPANDIDO: Força renderização cobrindo a página inteira */
+/* ESTADO REATIVO CINEMA EXPANDIDO ELEGANTE (DESKTOP & MOBILE) */
 .player-video-viewport.mode-viewport-expanded {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
     width: 100vw !important;
-    height: calc(100vh - 110px) !important; /* Desconta rigorosamente a barra inferior */
-    z-index: 9998 !important; /* Mantém a viewport logo abaixo dos botões de controle */
+    height: calc(100vh - 115px) !important; /* Desconta o espaço perfeito da barra inferior */
+    background-color: #090d16 !important; /* Fundo escuro puro fosco premium */
+    z-index: 9998 !important; /* Camada posicionada cirurgicamente abaixo da barra de botões */
     border-radius: 0px !important;
     border: none !important;
     box-shadow: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left) !important; /* Proteção contra notches de celulares */
+}
+
+/* Força o elemento de vídeo interno a preencher todo o espaço disponível sem esticar pixels */
+.player-video-viewport.mode-viewport-expanded video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+}
+
+/* Ajusta a posição do botão flutuante quando o modo cinema expandido estiver ativo */
+.player-video-viewport.mode-viewport-expanded .viewport-floating-action-btn {
+    bottom: 16px !important;
+    left: 16px !important;
+    background-color: rgba(15, 23, 42, 0.9) !important;
+    border-color: #06b6d4 !important; /* Destaque em ciano indicando modo ativo */
 }
 
 /* ==========================================================================
@@ -409,12 +434,27 @@
 #custom-player-container:fullscreen .time-display-container,
 #custom-player-container:-webkit-full-screen .time-display-container { color: #e2e8f0 !important; }
 
-/* RESPONSIVIDADE MENOR */
+/* MEDIA QUERY INDUSTRIAL: GARANTE VISIBILIDADE E RESPONSIVIDADE ERGONÔMICA NO MOBILE */
 @media (max-width: 768px) {
     .player-wrapper { flex-direction: column; gap: 0.75rem; }
     .player-video-viewport { width: 100%; max-width: 240px; }
     .controls-row { flex-direction: column; gap: 0.75rem; }
+
+    /* Força botões flutuantes a ficarem visíveis no mobile (sem depender de hover) */
+    .viewport-floating-action-btn {
+        opacity: 1 !important;
+        padding: 10px !important; 
+        min-width: 42px !important;
+        min-height: 42px !important;
+        background-color: rgba(15, 23, 42, 0.9) !important;
+    }
+    
+    /* Calibração fina para abrir espaço aos controles verticais empilhados no mobile */
+    .player-video-viewport.mode-viewport-expanded {
+        height: calc(100vh - 160px) !important;
+    }
 }
+
 
 
 
