@@ -1,0 +1,67 @@
+/* ==========================================================================
+   1. OVERLAY CINEMÁTICA E LAYOUT DO LIGHTBOX
+   ========================================================================== */
+.lightbox-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lightbox-overlay.lightbox-active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.lightbox-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1rem 2rem;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.lightbox-btn {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    padding: 0.5rem;
+    display: flex;
+}
+
+.lightbox-btn:hover {
+    color: #06b6d4;
+}
+
+.lightbox-btn.close-btn:hover {
+    color: #ef4444;
+}
+
+/* ==========================================================================
+   2. ÁREA DE VIEWPORT GRÁFICA DO FRAME AMPLIADO
+   ========================================================================== */
+.lightbox-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+    padding: 2rem;
+}
+
+.lightbox-content img {
+    max-width: 95%;
+    max-height: 85vh;
+    object-fit: contain;
+    border-radius: 0.25rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
