@@ -107,7 +107,7 @@
                                 '</button>',
                                 '<button id="btn-player-fullscreen" aria-label="Tela Cheia" class="player-btn" title="Tela Cheia (Fullscreen)">',
                                     '<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>',
-                                </button>',
+                                '</button>',
                                 '<button id="btn-player-close" aria-label="Fechar" class="player-btn close-btn">',
                                     '<svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>',
                                 '</button>',
@@ -177,7 +177,7 @@
                 event.preventDefault();
             });
 
-            // LOGICA DO MENU DE VELOCIDADE CUSTOMIZADO
+            // GESTOR DE VELOCIDADES FLUTUANTE
             btnSpeedMenu.addEventListener('click', function(e) {
                 e.stopPropagation();
                 speedMenuContainer.classList.toggle('menu-open');
@@ -235,6 +235,7 @@
                 window.VideoPlayerManager.updateTimeDisplay();
             });
 
+            // SNAPSHOT ENVIANDO 'image' COMO STRING PARÂMETRO PARA O CONTROLE DO LIGHTBOX
             btnSnapshot.addEventListener('click', function() {
                 if (!videoElement || !window.LightboxManager) return;
                 try {
@@ -250,7 +251,7 @@
                 }
             });
 
-            // PREVIEW GRÁFICO DE CENA DA TIMELINE
+            // PREVIEW DE MINIATURA DA LINHA DE TEMPO
             let isRenderingPreview = false;
             const renderCanvasPreview = function() {
                 if (!previewVideoElement || !previewCanvas) return;
@@ -287,7 +288,7 @@
                 previewWindow.style.display = 'none'; 
             });
 
-            // TOOLTIP DE VOLUME REATIVO NO PAI DO SLIDER
+            // TOOLTIP FLUTUANTE DE PORCENTAGEM DO VOLUME
             volumeSlider.addEventListener('mousemove', function(e) {
                 const rect = volumeSlider.getBoundingClientRect();
                 let pct = (e.clientX - rect.left) / rect.width;
@@ -304,7 +305,7 @@
                 volumeSliderWrapper.removeAttribute('data-player-tooltip-content');
             });
 
-            // CORREÇÃO DEFINITIVA: LEVA O CONTÊINER INTEIRO PARA O FULLSCREEN EM QUALQUER DISPOSITIVO (PC / ANDROID / IOS)
+            // DISPARADOR FULLSCREEN INTEGRAL
             btnFullscreen.addEventListener('click', function() {
                 if (!playerContainer) return;
 
@@ -316,7 +317,6 @@
                     else if (playerContainer.mozRequestFullScreen) { playerContainer.mozRequestFullScreen(); }
                     else if (playerContainer.msRequestFullscreen) { playerContainer.msRequestFullscreen(); }
                     else {
-                        // iOS/iPhone bypass: Emula o Fullscreen integral via CSS na DIV pai
                         playerContainer.classList.add('ios-virtual-fullscreen');
                         document.body.style.overflow = 'hidden';
                     }
