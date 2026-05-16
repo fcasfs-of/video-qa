@@ -780,20 +780,20 @@ img, video {
 
 
 /* ==========================================================================
-   12. MECANISMO DE TOOLTIPS FLUTUANTES COMPACTOS (CSS PURO)
+   12. MECANISMO DE TOOLTIPS FLUTUANTES COMPACTOS (PROGRESSO E VOLUME)
    ========================================================================== */
 .has-player-tooltip {
     position: relative;
 }
 
-/* Cria a caixa flutuante do Tooltip usando o atributo data-tooltip */
+/* Cria e posiciona a caixa suspensa usando o atributo data-tooltip */
 .has-player-tooltip::after {
     content: attr(data-tooltip);
     position: absolute;
-    bottom: calc(100% + 8px); /* Posiciona a caixa 8px acima do botão */
+    bottom: calc(100% + 10px);
     left: 50%;
     transform: translateX(-50%) translateY(4px);
-    background-color: #0f172a; /* Fundo escuro idêntico à paleta mestre */
+    background-color: #0f172a;
     color: #f8fafc;
     padding: 0.35rem 0.65rem;
     border-radius: 0.35rem;
@@ -805,18 +805,23 @@ img, video {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.1);
     transition: opacity 0.15s cubic-bezier(0.2, 0, 0.2, 1), transform 0.15s cubic-bezier(0.2, 0, 0.2, 1);
-    z-index: 2147483647 !important; /* Mantém o topo absoluto mesmo em tela cheia */
+    z-index: 2147483647 !important;
 }
 
-/* Exibe o indicador flutuante ao passar o mouse (:hover) */
+/* Exibe o indicador suspenso ao passar o mouse */
 .has-player-tooltip:hover::after {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
 }
 
-/* Ajuste específico para alinhar o Tooltip na barra de progresso horizontal mestre */
+/* Ajuste específico de respiro para a linha do tempo horizontal mestre */
 .custom-progress-bar-container.has-player-tooltip::after {
     bottom: calc(100% + 12px);
+}
+
+/* Ajuste específico para que o tooltip do slider de volume acompanhe o topo do container pai */
+.volume-slider-bar.has-player-tooltip::after {
+    bottom: calc(100% + 14px);
 }
 
 
