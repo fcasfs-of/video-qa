@@ -1,26 +1,32 @@
-    (function() {
-    // Mantém as referências internas isoladas em escopo de módulo efêmero
+(function() {
     let lightboxContainer = null;
     let currentScale = 1;
+    let wasPlayerPlaying = false; // Armazena o estado de reprodução antes da pausa
 
     window.LightboxManager = {
         /**
-         * Cria, configura e injeta dinamicamente o Lightbox na página
-         * @param {string} imageSrc - String base64 ou URL de origem da miniatura capturada
-         * @param {string} fileName - Prefixo nominal de identificação para o arquivo de salvamento
+         * Cria e injeta o Lightbox no DOM e gerencia a pausa automática do player
+         * @param {string} imageSrc - String base64 ou URL da imagem capturada
+         * @param {string} fileName - Prefixo nominal para download
          */
         open: function(imageSrc, fileName) {
-            // Varre e limpa preventivamente qualquer resquício órfão de chamadas anteriores
             this.closeImmediate();
 
             const titleToken = fileName || 'mp4_snapshot';
 
-            // Constrói o elemento contêiner mestre que ocupará toda a viewport
+            // AUTOMAÇÃO DE ENTRADA: Detecta se o player customizado existe e está reproduzindo
+            const videoEl = document.getElementById('custom-video-element');
+            if (videoEl) {
+                wasPlayerPlaying = !videoEl.paused && !videoEl.ended;
+                if (wasPlayerPlaying) {
+                    videoEl.pause(); // Pausa o vídeo de forma automática ao abrir o Lightbox
+                }
+            }
+
             lightboxContainer = document.createElement('div');
             lightboxContainer.id = 'custom-lightbox';
             lightboxContainer.className = 'lightbox-overlay';
 
-            // Injeta a estrutura semântica junto com todas as descrições de caminhos vetoriais SVG
             lightboxContainer.innerHTML = [
                 '<div class="lightbox-toolbar">',
                     '<button id="btn-lightbox-zoom" aria-label="Zoom" class="lightbox-btn" title="Zoom In/Out">',
@@ -40,7 +46,6 @@
 
             document.body.appendChild(lightboxContainer);
 
-            // Dois ciclos paralelos de renderização para garantir o engajamento perfeito da animação opaca via CSS
             requestAnimationFrame(function() {
                 requestAnimationFrame(function() {
                     if (lightboxContainer) {
@@ -52,9 +57,6 @@
             this.setupLightboxEvents(imageSrc, titleToken);
         },
 
-        /**
-         * Mapeia os barramentos de escuta reativos para interações do usuário dentro da interface flutuante
-         */
         setupLightboxEvents: function(imageSrc, titleToken) {
             if (!lightboxContainer) return;
 
@@ -66,7 +68,7 @@
             const svgZoomIn = '<svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zM10 7H9v2H7v1h2v2h1v-2h2V9h-2V7z"/></svg>';
             const svgZoomOut = '<svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zM7 9h6v2H7V9z"/></svg>';
 
-            // Lógica alternadora de nível dimensional de escala (Zoom 1x <-> 2x)
+            // Lógica do Zoom
             btnZoom.addEventListener('click', function(e) {
                 e.stopPropagation();
                 if (currentScale === 1) {
@@ -82,7 +84,7 @@
                 }
             });
 
-            // Dispara a rotina de salvamento delegada de forma explícita ao DownloadManager global
+            // Lógica do Download
             btnDownload.addEventListener('click', function(e) {
                 e.stopPropagation();
                 if (window.DownloadManager) {
@@ -90,7 +92,7 @@
                 }
             });
 
-            // Conecta gatilhos de fechamento (Botão X e cliques na área escura vazia)
+            // Gatilhos de Fechamento
             btnClose.addEventListener('click', function(e) { e.stopPropagation(); window.LightboxManager.close(); });
             lightboxContainer.addEventListener('click', function(e) {
                 if (e.target === lightboxContainer || e.target.classList.contains('lightbox-content')) {
@@ -100,7 +102,7 @@
         },
 
         /**
-         * Dispara a animação visual de fade-out e desvincula completamente o elemento da página
+         * Remove o Lightbox e AUTOMATICAMENTE retoma o player se ele estava tocando antes
          */
         close: function() {
             if (!lightboxContainer) return;
@@ -117,18 +119,27 @@
                 }
                 lightboxContainer = null;
                 currentScale = 1;
+
+                // AUTOMAÇÃO DE SAÍDA: Retoma a reprodução apenas se o vídeo estava tocando antes do clique
+                const videoEl = document.getElementById('custom-video-element');
+                if (videoEl && wasPlayerPlaying) {
+                    videoEl.play().catch(function(err) {
+                        console.log("Erro ao retomar o autoplay pós-lightbox:", err);
+                    });
+                    
+                    // Sincroniza visualmente o ícone do botão play do player de volta para Pause
+                    const btnPlay = document.getElementById('btn-player-play');
+                    if (btnPlay) {
+                        btnPlay.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+                    }
+                }
+                wasPlayerPlaying = false; // Reseta o estado de verificação
             };
 
-            // Remove o nó da árvore HTML assim que o efeito visual do CSS termina
             lightboxContainer.addEventListener('transitionend', purgeNode, { once: true });
-            
-            // Fallback de tempo determinístico caso o navegador falhe na detecção do evento
-            setTimeout(purgeNode, 350);
+            setTimeout(purgeNode, 350); 
         },
 
-        /**
-         * Executa a varredura síncrona forçada para limpar qualquer instância órfã
-         */
         closeImmediate: function() {
             const residualInstance = document.getElementById('custom-lightbox');
             if (residualInstance && residualInstance.parentNode) {
@@ -136,6 +147,7 @@
             }
             lightboxContainer = null;
             currentScale = 1;
+            wasPlayerPlaying = false;
         }
     };
 })();
