@@ -200,27 +200,17 @@
             document.addEventListener('fullscreenchange', handleFullscreenChange);
             document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
 
-            // CORREÇÃO: GATILHO DE DESTAQUE DE CINEMA EM TELA CHEIA (SEM TRAVA FIXA) [1]
+            // GATILHO CORRIGIDO: TELA CHEIA INTEGRAL DO NAVEGADOR (FIXED REAL FULL SCREEN)
             btnVpExpand.addEventListener('click', function(e) {
                 viewport.classList.add('mode-viewport-expanded');
                 btnVpExpand.style.setProperty('display', 'none', 'important');
                 btnVpCompress.style.setProperty('display', 'flex', 'important');
-                
-                // Centraliza a visão do usuário de forma suave diretamente no vídeo ampliado [1]
-                setTimeout(function() {
-                    viewport.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 50);
             });
 
             btnVpCompress.addEventListener('click', function(e) {
                 viewport.classList.remove('mode-viewport-expanded');
                 btnVpCompress.style.setProperty('display', 'none', 'important');
                 btnVpExpand.style.setProperty('display', 'flex', 'important');
-                
-                // Devolve a página à posição original estável [1]
-                setTimeout(function() {
-                    viewport.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }, 50);
             });
 
             btnPlay.addEventListener('click', function() {
@@ -258,7 +248,7 @@
                 window.VideoPlayerManager.updateTimeDisplay();
             });
 
-            // PREVIEW GRÁFICO DE CENA DA TIMELINE COORDENADO PELO MOUSE [3]
+            // PREVIEW GRÁFICO DE CENA DA TIMELINE COORDENADO PELO MOUSE
             progressRoot.addEventListener('mousemove', function(e) {
                 if (!videoElement.duration || !previewVideoElement) return;
                 
@@ -284,7 +274,7 @@
                 previewWindow.style.display = 'none'; 
             });
 
-            // RASTREAMENTO DO TOOLTIP DE VOLUME REATIVO NO PAI DO SLIDER [3]
+            // RASTREAMENTO DO TOOLTIP DE VOLUME REATIVO NO PAI DO SLIDER
             volumeSlider.addEventListener('mousemove', function(e) {
                 const rect = volumeSlider.getBoundingClientRect();
                 let pct = (e.clientX - rect.left) / rect.width;
