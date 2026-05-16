@@ -3,14 +3,12 @@
     let videoElement = null;
     let isLooping = false;
     let savedVideoUrl = ""; 
-    let savedFileName = ""; // Armazena o identificador/nome do arquivo ativo
+    let savedFileName = ""; 
     let savedTimeBeforeClose = 0; 
 
     window.VideoPlayerManager = {
         /**
          * Inicializa o Player de Vídeo Avançado fixado no rodapé
-         * @param {string} sourceUrl - URL remota ou ObjectURL do vídeo MP4
-         * @param {string} fileName - Nome identificador do arquivo para controle de reset
          */
         create: function(sourceUrl, fileName) {
             this.destroyRecoveryButton(); 
@@ -18,7 +16,6 @@
 
             const currentFileIdentifier = fileName || "video_stream";
 
-            // REGRA DE RESET: Se o nome do arquivo for diferente do anterior, zera o tempo salvo
             if (savedFileName !== currentFileIdentifier) {
                 savedTimeBeforeClose = 0;
             }
@@ -46,27 +43,21 @@
                         '</div>',
                         '<div class="controls-row">',
                             '<div class="controls-left">',
-                                '<!-- Botão Play/Pause -->',
                                 '<button id="btn-player-play" aria-label="Play/Pause" class="player-btn">',
                                     '<svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>',
                                 '</button>',
-                                '<!-- NOVO: Botão Parar (Stop) -->',
                                 '<button id="btn-player-stop" aria-label="Parar" class="player-btn" title="Parar">',
                                     '<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M6 6h12v12H6z"/></svg>',
                                 '</button>',
-                                '<!-- NOVO: Botão Retroceder 10s -->',
                                 '<button id="btn-player-rewind" aria-label="Retroceder 10s" class="player-btn" title="Voltar 10s">',
                                     '<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>',
                                 '</button>',
-                                '<!-- NOVO: Botão Avançar 10s -->',
                                 '<button id="btn-player-forward" aria-label="Avançar 10s" class="player-btn" title="Avançar 10s">',
                                     '<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>',
-                                '</button>',
-                                '<!-- Botão Loop -->',
+                                </button>',
                                 '<button id="btn-player-loop" aria-label="Loop" class="player-btn">',
                                     '<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>',
                                 '</button>',
-                                '<!-- Controle de Volume -->',
                                 '<div class="volume-control-wrapper">',
                                     '<button id="btn-player-mute" class="player-btn" aria-label="Mute Toggle">',
                                         '<svg id="icon-volume" viewBox="0 0 24 24" width="18" height="18"></svg>',
@@ -93,11 +84,9 @@
                                         '<option value="3">3.00x</option>',
                                     '</select>',
                                 '</div>',
-                                '<!-- Botão Ampliar no Lightbox -->',
                                 '<button id="btn-player-lightbox-expand" aria-label="Ampliar no Lightbox" class="player-btn" title="Ampliar Frame no Lightbox">',
                                     '<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83l1.41 1.41L19 6.41V10h2V3h-7z"/></svg>',
                                 '</button>',
-                                '<!-- Botão Tela Cheia (Fullscreen) -->',
                                 '<button id="btn-player-fullscreen" aria-label="Tela Cheia" class="player-btn" title="Tela Cheia">',
                                     '<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>',
                                 '</button>',
@@ -173,7 +162,6 @@
             document.addEventListener('fullscreenchange', handleFullscreenChange);
             document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
 
-            // Play / Pause
             btnPlay.addEventListener('click', function() {
                 if (videoElement.paused || videoElement.ended) {
                     videoElement.play().then(function() { btnPlay.innerHTML = svgPause; });
@@ -183,24 +171,20 @@
                 }
             });
 
-            // NOVO: Ação Botão Parar (Stop)
             btnStop.addEventListener('click', function() {
                 videoElement.pause();
                 videoElement.currentTime = 0;
                 btnPlay.innerHTML = svgPlay;
             });
 
-            // NOVO: Ação Botão Retroceder 10 Segundos
             btnRewind.addEventListener('click', function() {
                 videoElement.currentTime = Math.max(0, videoElement.currentTime - 10);
             });
 
-            // NOVO: Ação Botão Avançar 10 Segundos
             btnForward.addEventListener('click', function() {
                 videoElement.currentTime = Math.min(videoElement.duration, videoElement.currentTime + 10);
             });
 
-            // Loop de Repetição
             btnLoop.addEventListener('click', function() {
                 isLooping = !isLooping;
                 videoElement.loop = isLooping;
@@ -208,15 +192,20 @@
                 localStorage.setItem('player-setting-loop', isLooping ? 'true' : 'false');
             });
 
+            // ATUALIZAÇÃO SOLICITADA: Pausa o vídeo no momento exato do clique e joga no Lightbox
             btnExpandLightbox.addEventListener('click', function() {
                 if (!videoElement || !window.LightboxManager) return;
                 try {
+                    videoElement.pause();
+                    if (btnPlay) btnPlay.innerHTML = svgPlay;
+
                     const canvas = document.createElement('canvas');
                     canvas.width = videoElement.videoWidth || 640;
                     canvas.height = videoElement.videoHeight || 360;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
                     const frameDataUrl = canvas.toDataURL('image/png');
+                    
                     window.LightboxManager.open(frameDataUrl, 'player_snapshot');
                 } catch(e) {
                     console.error(e);
@@ -299,6 +288,20 @@
             });
         },
 
+        /**
+         * INTERFACE DE CONTROLE: Permite que outros scripts retomem a reprodução
+         */
+        resumePlayback: function() {
+            if (!videoElement) return;
+            videoElement.play().then(function() {
+                const btnPlay = playerContainer.querySelector('#btn-player-play');
+                const svgPause = '<svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+                if (btnPlay) btnPlay.innerHTML = svgPause;
+            }).catch(function(e) {
+                console.log("Falha ao retomar vídeo automaticamente:", e);
+            });
+        },
+
         updateVolumeIcon: function() {
             if (!videoElement || !playerContainer) return;
             const path = playerContainer.querySelector('#icon-volume');
@@ -342,13 +345,9 @@
             this.updateVolumeIcon();
         },
 
-        /**
-         * REQUISITO NOVO BILÍNGUE: Monta o botão flutuante traduzido de acordo com a lang da página
-         */
         createRecoveryButton: function() {
             if (document.getElementById('btn-player-recovery') || !savedVideoUrl) return;
 
-            // Detecta a linguagem ativa através do atributo no HTML ou salva no localStorage
             const activeLang = document.documentElement.getAttribute('lang') || localStorage.getItem('meta-lang') || 'pt';
             const buttonText = (activeLang.indexOf('en') !== -1) ? 'Open Player' : 'Abrir Player';
 
