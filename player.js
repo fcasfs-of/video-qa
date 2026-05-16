@@ -1,7 +1,7 @@
 (function() {
     let playerContainer = null;
     let videoElement = null;
-    let previewVideoElement = null; // Vídeo fantasma oculto em memória para renderizar os previews de cena
+    let previewVideoElement = null; // Vídeo fantasma em memória para renderizar previews na linha do tempo
     let isLooping = false;
     let savedVideoUrl = ""; 
     let savedFileName = ""; 
@@ -83,7 +83,7 @@
                                     '</button>',
                                     '<!-- Contêiner pai preparado para renderizar o tooltip flutuante sem quebras por cima -->',
                                     '<div class="slider-tooltip-container dynamic-volume-tooltip" id="volume-slider-wrapper">',
-                                        '<input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1" class="volume-slider-bar dynamic-volume-slider-tooltip">',
+                                        '<input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1" class="volume-slider-bar">',
                                     '</div>',
                                 '</div>',
                                 '<div class="time-display-container" id="time-display-click-root" style="cursor:pointer; user-select:none;">',
@@ -200,7 +200,7 @@
             document.addEventListener('fullscreenchange', handleFullscreenChange);
             document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
 
-            // GATILHO FORÇADO DE EXPANSÃO CINEMA (CANTO INFERIOR ESQUERDO)
+            // GATILHO FORÇADO DE EXPANSÃO INTERNA (MÓDULO CINEMA NO CANTO ESQUERDO)
             btnVpExpand.addEventListener('click', function(e) {
                 viewport.classList.add('mode-viewport-expanded');
                 btnVpExpand.style.setProperty('display', 'none', 'important');
@@ -273,7 +273,7 @@
                 previewWindow.style.display = 'none'; 
             });
 
-            // RASTREAMENTO DO TOOLTIP DE VOLUME REATIVO NO PAI DO SLIDER
+            // RASTREAMENTO DO TOOLTIP DE VOLUME REATIVO NO CONTÊINER FILHO DO INPUT
             volumeSlider.addEventListener('mousemove', function(e) {
                 const rect = volumeSlider.getBoundingClientRect();
                 let pct = (e.clientX - rect.left) / rect.width;
