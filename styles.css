@@ -779,6 +779,47 @@ img, video {
 }
 
 
+/* ==========================================================================
+   12. MECANISMO DE TOOLTIPS FLUTUANTES COMPACTOS (CSS PURO)
+   ========================================================================== */
+.has-player-tooltip {
+    position: relative;
+}
+
+/* Cria a caixa flutuante do Tooltip usando o atributo data-tooltip */
+.has-player-tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px); /* Posiciona a caixa 8px acima do botão */
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background-color: #0f172a; /* Fundo escuro idêntico à paleta mestre */
+    color: #f8fafc;
+    padding: 0.35rem 0.65rem;
+    border-radius: 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: opacity 0.15s cubic-bezier(0.2, 0, 0.2, 1), transform 0.15s cubic-bezier(0.2, 0, 0.2, 1);
+    z-index: 2147483647 !important; /* Mantém o topo absoluto mesmo em tela cheia */
+}
+
+/* Exibe o indicador flutuante ao passar o mouse (:hover) */
+.has-player-tooltip:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Ajuste específico para alinhar o Tooltip na barra de progresso horizontal mestre */
+.custom-progress-bar-container.has-player-tooltip::after {
+    bottom: calc(100% + 12px);
+}
+
+
 
 
 /* FULLSCREEN TOTAL DO CONTAINER */
