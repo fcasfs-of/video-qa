@@ -12,7 +12,7 @@
     z-index: 9999;
     padding: 1rem 2rem;
     animation: playerSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    overflow: visible !important; /* CRÍTICO: Permite que os previews flutuem para fora */
+    overflow: visible !important; /* CRÍTICO: Permite que menus e previews flutuem para fora */
 }
 
 @keyframes playerSlideUp {
@@ -42,10 +42,10 @@
 }
 
 /* ==========================================================================
-   2. VIEWPORT VISUAL PADRÃO E BOTÕES FLUTUANTES NO VÍDEO
+   2. VIEWPORT VISUAL DA MINIATURA PADRÃO DO RODAPÉ
    ========================================================================== */
 .player-video-viewport {
-    position: relative; /* Base de ancoragem fixa para os botões flutuantes */
+    position: relative;
     width: 160px;
     aspect-ratio: 16 / 9;
     background-color: #000000;
@@ -54,46 +54,12 @@
     border: 1px solid #334155;
     flex-shrink: 0;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .player-video-viewport video {
     width: 100%;
     height: 100%;
-    object-fit: contain; /* Mantém a proporção perfeita original */
-}
-
-/* BOTÃO FLUTUANTE DE EXPANSÃO (EMBUTIDO NA TELA) */
-.viewport-floating-action-btn {
-    position: absolute;
-    bottom: 8px;
-    left: 8px;
-    background-color: rgba(15, 23, 42, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #f8fafc !important;
-    padding: 8px; 
-    min-width: 36px;
-    min-height: 36px;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-    opacity: 0; /* Oculto por padrão no PC, surge no hover */
-    transition: opacity 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
-}
-
-/* Exibe o botão imediatamente ao passar o mouse (PC) */
-.player-video-viewport:hover .viewport-floating-action-btn {
-    opacity: 1 !important;
-}
-
-.viewport-floating-action-btn:hover {
-    background-color: #06b6d4;
-    color: #ffffff !important;
-    border-color: #06b6d4;
-    transform: scale(1.05);
+    object-fit: contain;
 }
 
 /* ==========================================================================
@@ -127,7 +93,8 @@
 .player-btn:hover,
 #custom-player-container #btn-player-stop:hover,
 #custom-player-container #btn-player-rewind:hover,
-#custom-player-container #btn-player-forward:hover {
+#custom-player-container #btn-player-forward:hover,
+#custom-player-container #btn-player-snapshot:hover {
     color: #06b6d4 !important;
     background-color: rgba(6, 182, 212, 0.1) !important;
 }
@@ -151,25 +118,6 @@
     color: #f8fafc !important;
     margin-left: 0.5rem;
     white-space: nowrap;
-}
-
-.select-speed-wrapper {
-    background-color: #334155 !important;
-    border: 1px solid #475569 !important;
-    border-radius: 0.5rem;
-    padding: 0.35rem 0.6rem;
-    display: flex;
-    align-items: center;
-}
-
-.select-speed-wrapper select {
-    background: transparent;
-    border: none;
-    color: #f8fafc !important;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    outline: none;
 }
 
 .custom-progress-bar-container {
@@ -231,7 +179,95 @@
 }
 
 /* ==========================================================================
-   4. PREVIEW DE CENA E TOOLTIP DE VOLUME FLUTUANTE (MÓDULO GEOMÉTRICO)
+   4. NOVO: MENU FLUTUANTE CUSTOMIZADO DE VELOCIDADES (PREMIUM MENU)
+   ========================================================================== */
+.player-speed-menu-wrapper {
+    position: relative;
+    display: inline-block;
+    overflow: visible !important;
+}
+
+/* Botão mestre indicador textual da velocidade corrente */
+.player-btn.speed-display-btn {
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 0.4rem 0.65rem;
+    border: 1px solid #475569;
+    border-radius: 0.5rem;
+    background-color: #334155;
+    min-width: 58px;
+    justify-content: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.player-btn.speed-display-btn:hover {
+    border-color: #06b6d4;
+}
+
+/* Lista suspensa contendo as opções de velocidade */
+.player-speed-dropdown-list {
+    position: absolute;
+    bottom: calc(100% + 12px); /* Suspende o balão acima da barra */
+    right: 0;
+    background-color: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid #475569;
+    border-radius: 0.5rem;
+    min-width: 90px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    padding: 0.35rem 0;
+    display: none; /* Controlado via classe .menu-open */
+    flex-direction: column;
+    z-index: 2147483647 !important;
+}
+
+/* Dispara a abertura imediata da cortina de opções */
+.player-speed-menu-wrapper.menu-open .player-speed-dropdown-list {
+    display: flex;
+    animation: speedMenuFadeIn 0.15s cubic-bezier(0, 0, 0.2, 1);
+}
+
+@keyframes speedMenuFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Elementos individuais de opção de velocidade */
+.speed-menu-item {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #cbd5e1;
+    padding: 0.45rem 1rem;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.speed-menu-item:hover {
+    background-color: rgba(6, 182, 212, 0.15);
+    color: #06b6d4;
+}
+
+/* Estado reativo para a velocidade ativa no momento */
+.speed-menu-item.active-speed {
+    color: #06b6d4;
+    font-weight: 700;
+    background-color: rgba(6, 182, 212, 0.08);
+}
+
+/* Adiciona um marcador de check sutil ao lado do item selecionado */
+.speed-menu-item.active-speed::after {
+    content: "✓";
+    font-size: 0.75rem;
+    margin-left: 6px;
+}
+
+/* ==========================================================================
+   5. PREVIEW DE CENA E TOOLTIP DE VOLUME FLUTUANTE (MÓDULO GEOMÉTRICO)
    ========================================================================== */
 .custom-progress-bar-container .timeline-preview-box {
     position: absolute;
@@ -299,7 +335,7 @@
 }
 
 /* ==========================================================================
-   5. BOTÃO DE RECUPERAÇÃO FLUTUANTE BILÍNGUE
+   6. BOTÃO DE RECUPERAÇÃO FLUTUANTE BILÍNGUE
    ========================================================================== */
 .player-recovery-floating-btn {
     position: fixed;
@@ -332,8 +368,8 @@
 }
 
 /* ==========================================================================
-   6. BLINDAGEM DE TELA CHEIA MONITORES (FULLSCREEN MANAGER NATIVO)
-   ========================================================================= */
+   7. BLINDAGEM DE TELA CHEIA MONITORES (FULLSCREEN MANAGER NATIVO)
+   ========================================================================== */
 #custom-player-container:fullscreen,
 #custom-player-container:-webkit-full-screen {
     width: 100vw !important;
@@ -405,15 +441,17 @@
     .player-video-viewport { width: 100%; max-width: 240px; }
     .controls-row { flex-direction: column; gap: 0.75rem; }
 
-    /* Força os botões flutuantes a permanecerem visíveis (mobile não possui hover) */
-    .viewport-floating-action-btn {
-        opacity: 1 !important;
-        padding: 10px !important; 
-        min-width: 42px !important;
-        min-height: 42px !important;
-        background-color: rgba(15, 23, 42, 0.9) !important;
+    /* Ajusta a ancoragem lateral do menu no mobile para não cortar nas bordas vazadas */
+    .player-speed-dropdown-list {
+        right: 50%;
+        transform: translateX(50%);
+    }
+    
+    .player-speed-menu-wrapper.menu-open .player-speed-dropdown-list {
+        transform: translateX(50%) translateY(0);
     }
 }
+
 
 
 
