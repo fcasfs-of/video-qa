@@ -900,6 +900,91 @@ img, video {
 }
 
 
+/* ==========================================================================
+   12. ENGENHARIA DE PREVIEW GRÁFICO E TOOLTIP DE VOLUME ISOLADO CORRIGIDO
+   ========================================================================== */
+
+/* Remove travas impostas do contêiner para que os balões flutuem livres por cima */
+.player-fixed-bottom {
+    overflow: visible !important;
+}
+
+.player-wrapper {
+    overflow: visible !important;
+}
+
+.player-controls {
+    overflow: visible !important;
+}
+
+/* MINI-JANELA FLUTUANTE DE PREVIEW DE CENA (FLUTUA POR CIMA DO FILME) */
+.custom-progress-bar-container .timeline-preview-box {
+    position: absolute;
+    bottom: calc(100% + 14px); /* Projeta o balão acima do objeto da barra */
+    left: var(--preview-x, 0px);
+    transform: translateX(-50%);
+    background-color: #0f172a;
+    border: 2px solid #06b6d4; /* Borda em ciano neon contrastante */
+    border-radius: 0.5rem;
+    padding: 4px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.7);
+    display: none; 
+    pointer-events: none;
+    z-index: 2147483647 !important; /* Camada suprema sobre qualquer viewport */
+}
+
+#timeline-preview-canvas {
+    display: block;
+    border-radius: 0.35rem;
+    background-color: #000000;
+}
+
+#timeline-preview-time {
+    display: block;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #06b6d4;
+    margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* TOOLTIP DINÂMICO ISOLADO REATIVO EXCLUSIVO DO CORPO DO SLIDER DE VOLUME */
+.volume-slider-bar.dynamic-volume-slider-tooltip {
+    position: relative;
+}
+
+/* Constrói a caixinha em cima do cursor escutando diretamente o input range */
+.volume-slider-bar.dynamic-volume-slider-tooltip::before {
+    content: attr(data-player-tooltip-content);
+    position: absolute;
+    bottom: calc(100% + 16px);
+    left: var(--tooltip-x, 50%);
+    transform: translateX(-50%) translateY(4px);
+    background-color: #0f172a;
+    color: #f8fafc;
+    padding: 0.3rem 0.55rem;
+    border-radius: 0.25rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: opacity 0.1s ease-out, transform 0.1s ease-out;
+    z-index: 2147483647 !important;
+}
+
+/* Dispara o surgimento do balão apenas no hover do slider físico */
+.volume-slider-bar.dynamic-volume-slider-tooltip:hover::before {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+
+
 
 /* FULLSCREEN TOTAL DO CONTAINER */
 #custom-player-container.fullscreen-mode-active {
