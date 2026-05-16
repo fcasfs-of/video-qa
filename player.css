@@ -62,10 +62,10 @@
 .player-video-viewport video {
     width: 100%;
     height: 100%;
-    object-fit: contain; /* Garante que a proporção original do filme nunca mude */
+    object-fit: contain; /* Mantém a proporção nativa apenas no modo miniatura padrão */
 }
 
-/* BOTÕES FLUTUANTES INTEGRADOS À TELA */
+/* BOTÕES FLUTUANTES INTEGRADOS À TELA DO VÍDEO */
 .viewport-floating-action-btn {
     position: absolute;
     bottom: 8px;
@@ -82,7 +82,7 @@
     align-items: center;
     justify-content: center;
     z-index: 100;
-    opacity: 0; /* Fica invisível no PC até o hover */
+    opacity: 0; /* Oculto por padrão no PC, surge no hover */
     transition: opacity 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
 }
 
@@ -98,29 +98,30 @@
     transform: scale(1.05);
 }
 
-/* ESTADO REATIVO CINEMA EXPANDIDO ELEGANTE (DESKTOP & MOBILE) */
+/* ==========================================================================
+   ESTADO REATIVO CINEMA EXPANDIDO: FORÇADO EM 100% DA LARGURA (WIDTH) REAL
+   ========================================================================== */
 .player-video-viewport.mode-viewport-expanded {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
-    width: 100vw !important;
-    height: calc(100vh - 115px) !important; /* Desconta o espaço perfeito da barra inferior */
-    background-color: #090d16 !important; /* Fundo escuro puro fosco premium */
-    z-index: 9998 !important; /* Camada posicionada cirurgicamente abaixo da barra de botões */
+    width: 100vw !important; /* Trava o contêiner em 100% da largura da janela */
+    height: calc(100vh - 115px) !important; /* Desconta o espaço da barra inferior de controles */
+    background-color: #090d16 !important; /* Fundo escuro premium */
+    z-index: 9998 !important; /* Camada posicionada abaixo do painel de controles */
     border-radius: 0px !important;
     border: none !important;
     box-shadow: none !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left) !important; /* Proteção contra notches de celulares */
+    display: block !important; /* Remove restrições de Flexbox para esticamento total */
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
-/* Força o elemento de vídeo interno a preencher todo o espaço disponível sem esticar pixels */
+/* O VÍDEO INTERNO PREENCHE OBRIGATORIAMENTE 100% DA LARGURA DISPONÍVEL */
 .player-video-viewport.mode-viewport-expanded video {
-    width: 100% !important;
+    width: 100vw !important; /* Força o vídeo a esticar em 100% do width */
     height: 100% !important;
-    object-fit: contain !important;
+    object-fit: cover !important; /* Elimina as barras pretas laterais preenchendo o espaço */
 }
 
 /* Ajusta a posição do botão flutuante quando o modo cinema expandido estiver ativo */
@@ -128,7 +129,7 @@
     bottom: 16px !important;
     left: 16px !important;
     background-color: rgba(15, 23, 42, 0.9) !important;
-    border-color: #06b6d4 !important; /* Destaque em ciano indicando modo ativo */
+    border-color: #06b6d4 !important;
 }
 
 /* ==========================================================================
@@ -367,8 +368,8 @@
 }
 
 /* ==========================================================================
-   6. BLINDAGEM DE TELA CHEIA (FULLSCREEN MANAGER)
-   ========================================================================== */
+   6. BLINDAGEM DE TELA CHEIA MONITORES (FULLSCREEN MANAGER)
+   ========================================================================= */
 #custom-player-container:fullscreen,
 #custom-player-container:-webkit-full-screen {
     width: 100vw !important;
@@ -434,13 +435,13 @@
 #custom-player-container:fullscreen .time-display-container,
 #custom-player-container:-webkit-full-screen .time-display-container { color: #e2e8f0 !important; }
 
-/* MEDIA QUERY INDUSTRIAL: GARANTE VISIBILIDADE E RESPONSIVIDADE ERGONÔMICA NO MOBILE */
+/* MEDIA QUERY INDUSTRIAL: SUPORTE COMPLETO MOBILE EM DISPOSITIVOS DE TOQUE */
 @media (max-width: 768px) {
     .player-wrapper { flex-direction: column; gap: 0.75rem; }
     .player-video-viewport { width: 100%; max-width: 240px; }
     .controls-row { flex-direction: column; gap: 0.75rem; }
 
-    /* Força botões flutuantes a ficarem visíveis no mobile (sem depender de hover) */
+    /* Força botões flutuantes a permanecerem visíveis (mobile não possui hover de mouse) */
     .viewport-floating-action-btn {
         opacity: 1 !important;
         padding: 10px !important; 
@@ -449,11 +450,17 @@
         background-color: rgba(15, 23, 42, 0.9) !important;
     }
     
-    /* Calibração fina para abrir espaço aos controles verticais empilhados no mobile */
+    /* Calibração fina da altura no mobile para cobrir de forma elegante sem quebras horizontais */
     .player-video-viewport.mode-viewport-expanded {
         height: calc(100vh - 160px) !important;
     }
+    
+    .player-video-viewport.mode-viewport-expanded video {
+        width: 100vw !important;
+        object-fit: fill !important; /* Em smartphones verticais, preenche de ponta a ponta sem cortes laterais */
+    }
 }
+
 
 
 
