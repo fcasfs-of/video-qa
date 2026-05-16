@@ -1,7 +1,7 @@
 (function() {
     let playerContainer = null;
     let videoElement = null;
-    let previewVideoElement = null; 
+    let previewVideoElement = null; // Vídeo fantasma oculto em memória para renderizar os previews de cena
     let isLooping = false;
     let savedVideoUrl = ""; 
     let savedFileName = ""; 
@@ -50,7 +50,7 @@
                     '<div class="player-controls" id="player-custom-controls-ui">',
                         '<!-- Barra de Progresso Customizada Original com Tooltip Dinâmico de Cena -->',
                         '<div class="custom-progress-bar-container" id="progress-bar-root">',
-                            '<!-- Contêiner Flutuante Superior do Preview de Cena -->',
+                            '<!-- Contêiner Flutuante do Preview de Cena -->',
                             '<div class="timeline-preview-box" id="timeline-preview-window">',
                                 '<canvas id="timeline-preview-canvas" width="120" height="68"></canvas>',
                                 '<span id="timeline-preview-time">00:00:00</span>',
@@ -81,6 +81,7 @@
                                     '<button id="btn-player-mute" class="player-btn" aria-label="Mute Toggle">',
                                         '<svg id="icon-volume" viewBox="0 0 24 24" width="18" height="18"></svg>',
                                     '</button>',
+                                    '<!-- Contêiner pai preparado para renderizar o tooltip flutuante sem quebras por cima -->',
                                     '<div class="slider-tooltip-container dynamic-volume-tooltip" id="volume-slider-wrapper">',
                                         '<input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1" class="volume-slider-bar dynamic-volume-slider-tooltip">',
                                     '</div>',
@@ -199,19 +200,17 @@
             document.addEventListener('fullscreenchange', handleFullscreenChange);
             document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
 
-            // CONTROLES DE EXPANSÃO FOCADA DA VIEWPORT DO VÍDEO
+            // GATILHO FORÇADO DE EXPANSÃO CINEMA (CANTO INFERIOR ESQUERDO)
             btnVpExpand.addEventListener('click', function(e) {
-                e.stopPropagation();
                 viewport.classList.add('mode-viewport-expanded');
-                btnVpExpand.style.display = 'none';
-                btnVpCompress.style.display = 'flex';
+                btnVpExpand.style.setProperty('display', 'none', 'important');
+                btnVpCompress.style.setProperty('display', 'flex', 'important');
             });
 
             btnVpCompress.addEventListener('click', function(e) {
-                e.stopPropagation();
                 viewport.classList.remove('mode-viewport-expanded');
-                btnVpCompress.style.display = 'none';
-                btnVpExpand.style.display = 'flex';
+                btnVpCompress.style.setProperty('display', 'none', 'important');
+                btnVpExpand.style.setProperty('display', 'flex', 'important');
             });
 
             btnPlay.addEventListener('click', function() {
@@ -249,7 +248,7 @@
                 window.VideoPlayerManager.updateTimeDisplay();
             });
 
-            // PREVIEW GRÁFICO DE CENA DA TIMELINE
+            // PREVIEW GRÁFICO DE CENA DA TIMELINE COORDENADO PELO MOUSE
             progressRoot.addEventListener('mousemove', function(e) {
                 if (!videoElement.duration || !previewVideoElement) return;
                 
@@ -271,7 +270,7 @@
             });
 
             progressRoot.addEventListener('mouseleave', function() {
-                previewWindow.style.display = 'none';
+                previewWindow.style.display = 'none'; 
             });
 
             // RASTREAMENTO DO TOOLTIP DE VOLUME REATIVO NO PAI DO SLIDER
